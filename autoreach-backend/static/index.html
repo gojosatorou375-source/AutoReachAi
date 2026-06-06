@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoReach AI — Editorial Workspace</title>
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts: Playfair Display & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-layout">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-brand">
+                <h1 class="brand-title">AutoReach AI</h1>
+                <p class="brand-subtitle">Editorial Workspace</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="overview">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                    Overview
+                </button>
+                <button class="nav-item" data-tab="threads">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-3 0v2a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-2"/></svg>
+                    Tracked Threads
+                </button>
+                <button class="nav-item" data-tab="drafts">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Follow-up Drafts
+                    <span class="badge badge-warning sidebar-badge" id="pending-drafts-badge" style="display: none;">0</span>
+                </button>
+            </nav>
+            
+            <!-- Sidebar Footer / User Selector -->
+            <div class="sidebar-footer">
+                <div class="user-selector-container">
+                    <label for="active-user-id" class="field-label">Active Operator</label>
+                    <div class="user-input-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input type="text" id="active-user-id" value="mohan" title="User ID for tracking outbound email threads">
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            
+            <!-- OVERVIEW PANEL -->
+            <section id="panel-overview" class="tab-panel active">
+                <header class="panel-header">
+                    <div>
+                        <h2 class="section-title">Workspace Overview</h2>
+                        <p class="section-subtitle">Summary of current outbound conversations and pending drafts.</p>
+                    </div>
+                    <button class="btn btn-primary btn-add-thread-trigger">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Register Outbound Thread
+                    </button>
+                </header>
+                
+                <!-- Metrics Grid -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-label">Tracked Threads</span>
+                        <div class="metric-value-container">
+                            <span class="metric-value" id="metric-tracked-threads">—</span>
+                            <span class="metric-accent-line"></span>
+                        </div>
+                        <p class="metric-description">Active email conversations in monitoring</p>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Pending Follow-ups</span>
+                        <div class="metric-value-container">
+                            <span class="metric-value" id="metric-pending-drafts">—</span>
+                            <span class="metric-accent-line"></span>
+                        </div>
+                        <p class="metric-description">AI generated drafts awaiting operator review</p>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Stale Conversations</span>
+                        <div class="metric-value-container">
+                            <span class="metric-value text-danger" id="metric-stale-threads">—</span>
+                            <span class="metric-accent-line"></span>
+                        </div>
+                        <p class="metric-description">Threads past threshold without reply</p>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Total AI Tokens</span>
+                        <div class="metric-value-container">
+                            <span class="metric-value" id="metric-tokens-used">—</span>
+                            <span class="metric-accent-line"></span>
+                        </div>
+                        <p class="metric-description">Accumulated OpenAI completion usage</p>
+                    </div>
+                </div>
+
+                <!-- Dashboard Split -->
+                <div class="dashboard-split">
+                    <!-- Column Left: Urgent Stale Threads -->
+                    <div class="dashboard-card card-large">
+                        <div class="card-header">
+                            <h3 class="card-title">Stale Threads Awaiting Response</h3>
+                            <span class="badge badge-danger" id="stale-threads-badge">0 Stale</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container list-view">
+                                <table class="data-table" id="dashboard-stale-threads-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Recipient</th>
+                                            <th>Subject</th>
+                                            <th>Sent</th>
+                                            <th>Urgency</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashboard-stale-threads-body">
+                                        <!-- Dynamic Stale Threads -->
+                                        <tr>
+                                            <td colspan="5" class="table-empty">Loading stale threads...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column Right: Recent Pending Drafts -->
+                    <div class="dashboard-card card-small">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Drafts</h3>
+                            <button class="text-link-btn view-all-drafts-btn">View Inbox</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="draft-small-list" id="dashboard-recent-drafts-list">
+                                <!-- Dynamic Recent Drafts -->
+                                <p class="loading-text">Loading drafts...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- THREADS PANEL -->
+            <section id="panel-threads" class="tab-panel">
+                <header class="panel-header">
+                    <div>
+                        <h2 class="section-title">Tracked Conversations</h2>
+                        <p class="section-subtitle">Outbound email threads monitored for recipient response.</p>
+                    </div>
+                    <button class="btn btn-primary btn-add-thread-trigger">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Register Outbound Thread
+                    </button>
+                </header>
+
+                <div class="toolbar">
+                    <div class="filter-group">
+                        <button class="filter-chip active" data-thread-status="all">All</button>
+                        <button class="filter-chip" data-thread-status="tracking">Tracking</button>
+                        <button class="filter-chip" data-thread-status="draft_ready">Draft Ready</button>
+                        <button class="filter-chip" data-thread-status="replied">Replied</button>
+                        <button class="filter-chip" data-thread-status="dismissed">Dismissed</button>
+                    </div>
+                    <div class="toolbar-search">
+                        <input type="text" id="threads-search-input" placeholder="Search by recipient or subject...">
+                    </div>
+                </div>
+
+                <!-- Threads Table -->
+                <div class="dashboard-card">
+                    <div class="table-container">
+                        <table class="data-table" id="threads-main-table">
+                            <thead>
+                                <tr>
+                                    <th>Recipient</th>
+                                    <th>Subject</th>
+                                    <th>Sent Date</th>
+                                    <th>Intent Tag</th>
+                                    <th>Urgency</th>
+                                    <th>Status</th>
+                                    <th class="table-actions-header">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="threads-table-body">
+                                <tr>
+                                    <td colspan="7" class="table-empty">Loading tracked threads...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- DRAFTS PANEL -->
+            <section id="panel-drafts" class="tab-panel">
+                <header class="panel-header">
+                    <div>
+                        <h2 class="section-title">AI Follow-up Draft Box</h2>
+                        <p class="section-subtitle">Review, edit, and approve generated drafts for stale conversations.</p>
+                    </div>
+                </header>
+
+                <!-- Draft Workspace Split -->
+                <div class="draft-workspace">
+                    <!-- Left side: Drafts list -->
+                    <div class="drafts-sidebar">
+                        <div class="draft-sidebar-filter">
+                            <button class="tab-sub-btn active" data-draft-status="pending">Pending</button>
+                            <button class="tab-sub-btn" data-draft-status="approved">Approved</button>
+                            <button class="tab-sub-btn" data-draft-status="dismissed">Dismissed</button>
+                        </div>
+                        <div class="drafts-list" id="drafts-sidebar-list">
+                            <!-- Dynamic draft list cards -->
+                            <p class="loading-text">Loading drafts...</p>
+                        </div>
+                    </div>
+
+                    <!-- Right side: Selected draft editor -->
+                    <div class="draft-editor-pane" id="draft-editor-container">
+                        <!-- Loaded Selected Draft Editor -->
+                        <div class="draft-editor-placeholder">
+                            <svg class="placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            <h3>No Draft Selected</h3>
+                            <p>Select a follow-up draft from the left panel to review and take action.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- REGISTER NEW THREAD DRAWER -->
+    <div class="drawer-overlay" id="add-thread-drawer-overlay"></div>
+    <div class="drawer" id="add-thread-drawer">
+        <div class="drawer-header">
+            <div>
+                <h3 class="drawer-title">Register Outbound Thread</h3>
+                <p class="drawer-subtitle">Initialize monitoring on a new email thread.</p>
+            </div>
+            <button class="drawer-close-btn" id="add-thread-drawer-close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        
+        <form class="drawer-form" id="add-thread-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="form-recipient-name" class="form-label">Recipient Name</label>
+                    <input type="text" id="form-recipient-name" required placeholder="e.g. John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="form-recipient-email" class="form-label">Recipient Email</label>
+                    <input type="email" id="form-recipient-email" required placeholder="name@domain.com">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="form-subject" class="form-label">Email Subject</label>
+                <input type="text" id="form-subject" required placeholder="Subject of outbound email">
+            </div>
+
+            <div class="form-group">
+                <label for="form-original-body" class="form-label">Sent Email Body</label>
+                <textarea id="form-original-body" required placeholder="Paste the content of the outbound email here..."></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="form-sent-at" class="form-label">Sent Date & Time</label>
+                    <input type="datetime-local" id="form-sent-at" required>
+                </div>
+                <div class="form-group">
+                    <label for="form-intent-tag" class="form-label">Conversation Intent</label>
+                    <select id="form-intent-tag">
+                        <option value="other">Other</option>
+                        <option value="job_application">Job Application</option>
+                        <option value="sales">Sales & Outreach</option>
+                        <option value="networking">Networking</option>
+                        <option value="internship">Internship</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="slider-label-row">
+                    <label for="form-urgency-score" class="form-label">Urgency Weight</label>
+                    <span class="slider-value" id="form-urgency-score-val">20</span>
+                </div>
+                <input type="range" id="form-urgency-score" min="0" max="100" value="20" class="form-slider">
+                <p class="field-help">Affects priority scanning and AI draft generation tone selection.</p>
+            </div>
+
+            <div class="drawer-actions">
+                <button type="button" class="btn btn-secondary" id="add-thread-drawer-cancel">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save & Track
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- JS Logic -->
+    <script src="app.js"></script>
+</body>
+</html>

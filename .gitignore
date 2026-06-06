@@ -1,0 +1,15 @@
+# IDEs and editors
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Backend specific ignores (just in case)
+autoreach-backend/.venv/
+autoreach-backend/__pycache__/
+autoreach-backend/.env
+
+# Frontend specific ignores (just in case)
+autoreach-frontend/node_modules/
+autoreach-frontend/dist/
